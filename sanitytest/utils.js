@@ -56,6 +56,12 @@ function watchKeys(holdKeys, pressKeys) {
     function cmp(s1, s2) {
         return s1.toLowerCase() == s2.toLowerCase();
     }
+    for (let key of holdKeys) {
+        holdKeys[key] = key.toLowerCase();
+    }
+    for (let key in pressKeys) {
+        pressKeys[key] = key.toLowerCase();
+    }
 
     const inputState = {};
     for (let key of holdKeys) {

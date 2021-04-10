@@ -7,7 +7,7 @@ const gl = canv.getContext("webgl", {
 gl.enable(gl.DEPTH_TEST);
 
 const PARAMS = {
-    inChunkReps: 100,
+    inChunkReps: 1,
     chunkReps: 4,
 };
 
@@ -20,9 +20,11 @@ function makeScene1() {
             x, 0, y,
             x+1, 0, y,
             x, 0, y+1,
+            /*
             x, 0, y+1,
             x+1, 0, y,
             x+1, 0, y+1,
+            */
         ]);
         colorArray.push(...Array(18).fill(s));
     }
@@ -77,7 +79,7 @@ function draw() {
         .multiply(new THREE.Matrix4().set(
             1, 0, 0, 0,
             0, 1, 0, 0,
-            0, 0, 0, -0.01,
+            0, 0, 0, 0.01,
             0, 0, 1, 0,
         ))
         // 3. YZ-plane rotation
@@ -110,15 +112,26 @@ function draw() {
 
     function drawChunk(x, y) {
         gl.uniform4f(offsetUniformLocation, x, y, 0, 0,);
-        gl.drawArrays(gl.TRIANGLES, 0, 6 * PARAMS.inChunkReps**2);
+        gl.drawArrays(gl.TRIANGLES, 0, 3/*6*/ * PARAMS.inChunkReps**2);
     }
 
+    drawChunk(0, 0);
+
+    console.log("===BEGIN FRAME===");
+    for (let i = 0; i < positionArray.length/3; i++) {
+        let v = new THREE.Vector4(...positionArray.slice(3*i, 3*i+3), 1);
+        v.applyMatrix4(transformMatrix);
+        console.log(v);
+    }
+    console.log("===END FRAME===");
+    /*
     const reps = PARAMS.chunkReps;
     for (let x = -reps; x < reps; x++) {
         for (let y = -reps; y < reps; y++) {
             drawChunk(PARAMS.inChunkReps*x, PARAMS.inChunkReps*y);
         }
     }
+    */
 }
 
 const gameState = {
@@ -127,7 +140,7 @@ const gameState = {
     playerZ: 0,
     thetaX: 0,
     thetaY: 0.0,
-    velocity: 40.0,
+    velocity: 20.0,
     menu: false,
 };
 
@@ -136,6 +149,7 @@ const keyInputState = watchKeys(
     {
         "escape": function() {
             gameState.menu != gameState.menu;
+            draw();
         }
     }
 );
@@ -200,4 +214,4 @@ function outFps(fps) {
     dashslots[0].innerText = `FPS: ${fps.toFixed(0)}`;
 }
 
-const cancelFrames = runGameLoop(update, draw, outFps);
+const cancelFrames = runGameLoop(update, () => {}, outFps);
