@@ -7,7 +7,7 @@ const gl = canv.getContext("webgl", {
 gl.enable(gl.DEPTH_TEST);
 
 const PARAMS = {
-    inChunkReps: 100,
+    inChunkReps: 256,
     chunkReps: 4,
 };
 
@@ -105,7 +105,7 @@ function draw() {
     gl.uniformMatrix4fv(transformUniformLocation, false, transformMatrix.toArray());
 
     gl.viewport(0, 0, canv.width, canv.height);
-    gl.clearColor(0, 0, 0, 0.0);
+    gl.clearColor(1.0, 0.2, 0.2, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     function drawChunk(x, y) {
@@ -131,18 +131,30 @@ const gameState = {
     menu: false,
 };
 
+const menuElem = document.querySelector("#menu");
+function toggleMenu() {
+    gameState.menu = !gameState.menu;
+    if (gameState.menu) {
+        menuElem.style.display = "block";
+    } else {
+        menuElem.style.display = "none";
+    }
+}
+menuElem.querySelector("#backToGame").addEventListener("click", toggleMenu);
+
 const keyInputState = watchKeys(
     [" ", "shift", "w", "a", "s", "d"],
-    {
-        "escape": function() {
-            gameState.menu != gameState.menu;
-        }
-    }
+    { "escape": toggleMenu }
 );
 const mouseInputState = watchAndHideMouse();
 
 const mouseSensitivity = 1.5 / 1000;
 function update(delta) {
+    // do nothing if in menu
+    if (gameState.menu) {
+        return;
+    }
+
     // update camera direction
     gameState.thetaY = mouseSensitivity * Math.PI * mouseInputState.x;
     var thetaX = mouseSensitivity * Math.PI * mouseInputState.y;
