@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            canvas {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas>
+        </canvas>
+        <button>get lock</button>
+        <script>
+            const canv = document.querySelector("canvas");
+            const button = document.querySelector("button");
+
+            canv.addEventListener("click", e => {
+                canv.requestPointerLock();
+            });
+            const mousePos = { x: 0, y: 0 };
+            canv.addEventListener("mousemove", e => {
+                mousePos.x += e.movementX;
+                mousePos.y += e.movementY;
+            });
+
+            button.addEventListener("click", e => {
+                canv.requestPointerLock();
+            });
+
+            window.addEventListener("keydown", e => {
+                console.log(e.key, "down");
+                if (e.key == " ") {
+                    console.log(mousePos);
+                }
+            });
+            window.addEventListener("keyup", e => {
+                console.log(e.key, "up");
+            });
+
+            document.addEventListener("pointerlockchange", e => {
+                console.log(e);
+            });
+        </script>
+    </body>
+</html>

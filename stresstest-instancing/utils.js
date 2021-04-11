@@ -52,23 +52,15 @@ function rescaleCanvas(canv, dpi) {
 
 // makes an inputState object which maintains boolean press-state of each of holdKeys,
 // and fires a function on press of each of pressKeys.
-function watchKeys(holdKeys) {
+function watchKeys(holdKeys, pressKeys) {
     function cmp(s1, s2) {
         return s1.toLowerCase() == s2.toLowerCase();
     }
 
     const inputState = {};
-    function setAllFalse() {
-        for (let key of holdKeys) {
-            inputState[key] = false;
-        }
+    for (let key of holdKeys) {
+        inputState[key] = false;
     }
-    setAllFalse();
-    document.addEventListener("pointerlockchange", () => {
-        if (document.pointerLockElement == null) {
-            setAllFalse();
-        }
-    });
     window.addEventListener("keydown", e => {
         for (let key of holdKeys) {
             if (cmp(key, e.key)) {
@@ -77,6 +69,11 @@ function watchKeys(holdKeys) {
         }
         if (holdKeys.includes("shift")) {
             holdKeys["shift"] = e.shiftKey;
+        }
+        for (let key in pressKeys) {
+            if (cmp(key, e.key)) {
+                pressKeys[key]();
+            }
         }
     });
     window.addEventListener("keyup", e => {
@@ -92,16 +89,10 @@ function watchKeys(holdKeys) {
 // returns mouse X and Y as delta from center of client
 // using up is positive for Y
 function watchAndHideMouse() {
-    // track mouse position: use a fixed system if no pointer lock, and infinite with pointer lock.
     const mouseState = { x: 0, y: 0 };
-    canv.addEventListener("mousemove", e => {
-        if (document.pointerLockElement == canv) {
-            mouseState.x += e.movementX;
-            mouseState.y -= e.movementY;
-        } else {
-            mouseState.x = e.clientX - window.innerWidth / 2;
-            mouseState.y = window.innerHeight / 2 - e.clientY;
-        }
+    window.addEventListener("mousemove", e => {
+        mouseState.x = e.clientX - window.innerWidth / 2;
+        mouseState.y = window.innerHeight / 2 - e.clientY;
     });
     return mouseState;
 }

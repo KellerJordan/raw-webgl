@@ -9,13 +9,18 @@ if (!gl) {
 }
 gl.enable(gl.DEPTH_TEST);
 
+const ext = gl.getExtension("ANGLE_instanced_arrays");
+if (!ext) {
+    alert("no ext");
+}
+
 const PARAMS = {
-    inChunkReps: 512,
-    chunkReps: 2,
+    inChunkReps: 32,
+    chunkReps: 32,
 };
 PARAMS.numVertices = 6 * PARAMS.inChunkReps**2;
 PARAMS.numInstances = (2*PARAMS.chunkReps)**2;
-PARAMS.totalTriangles = PARAMS.numVertices * PARAMS.numInstances / 6;
+PARAMS.totalVertices = PARAMS.numVertices * PARAMS.numInstances;
 
 function makeScene1() {
     const reps = PARAMS.inChunkReps;
@@ -44,7 +49,8 @@ function makeScene1() {
 const program = createProgramFromSources(gl, vertexShaderSource, fragmentShaderSource);
 gl.useProgram(program);
 
-// can be put with code-block..
+const transformUniformLocation = gl.getUniformLocation(program, "u_transform");
+
 const positionAttributeLocation = gl.getAttribLocation(program, "a_position");
 gl.enableVertexAttribArray(positionAttributeLocation);
 const colorAttributeLocation = gl.getAttribLocation(program, "a_color");
@@ -64,19 +70,31 @@ gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 gl.vertexAttribPointer(colorAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
-const transformUniformLocation = gl.getUniformLocation(program, "u_transform");
-const offsetUniformLocation = gl.getUniformLocation(program, "u_offset");
+// second level
+function makeStack() {
+    const offsets = [];
+    const reps = PARAMS.chunkReps;
+    for (let x = -reps; x < reps; x++) {
+        for (let y = -reps; y < reps; y++) {
+            offsets.push(PARAMS.inChunkReps*x);
+            offsets.push(PARAMS.inChunkReps*y);
+            offsets.push(0);
+        }
+    }
+    return new Float32Array(offsets);
+}
 
-// track gameState and draw depending =========================================
-const gameState = {
-    playerX: 0.5,
-    playerY: 1.3,
-    playerZ: 0.5,
-    thetaX: 0,
-    thetaY: 0.0,
-    velocity: 20.0,
-    menu: false,
-};
+const offsetAttributeLocation = gl.getAttribLocation(program, "a_offset");
+
+const offsetBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, offsetBuffer);
+gl.bufferData(gl.ARRAY_BUFFER, PARAMS.numInstances * 3 * 4, gl.DYNAMIC_DRAW);
+const offsetArray = makeStack();
+gl.bufferSubData(gl.ARRAY_BUFFER, 0, offsetArray);
+
+gl.enableVertexAttribArray(offsetAttributeLocation);
+gl.vertexAttribPointer(offsetAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+ext.vertexAttribDivisorANGLE(offsetAttributeLocation, 1);
 
 function draw() {
     const { thetaX, thetaY, playerX, playerY, playerZ } = gameState;
@@ -125,42 +143,37 @@ function draw() {
     gl.clearColor(1.0, 0.2, 0.2, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    function drawChunk(x, y) {
-        gl.uniform4f(offsetUniformLocation, x, y, 0, 0,);
-        gl.drawArrays(gl.TRIANGLES, 0, 6 * PARAMS.inChunkReps**2);
-    }
-
-    const reps = PARAMS.chunkReps;
-    for (let x = -reps; x < reps; x++) {
-        for (let y = -reps; y < reps; y++) {
-            drawChunk(PARAMS.inChunkReps*x, PARAMS.inChunkReps*y);
-        }
-    }
+    ext.drawArraysInstancedANGLE(gl.TRIANGLES, 0, PARAMS.numVertices, PARAMS.numInstances);
+    //gl.drawArraysInstanced(gl.TRIANGLES, 0, 6 * PARAMS.inChunkReps**2, (2*PARAMS.chunkReps)**2);
 }
 
-// track user input ===========================================================
+const gameState = {
+    playerX: 0,
+    playerY: 0.3,
+    playerZ: 0,
+    thetaX: 0,
+    thetaY: 0.0,
+    velocity: 40.0,
+    menu: false,
+};
+
 const menuElem = document.querySelector("#menu");
-function tryGetPointerLock() {
-    if (document.pointerLockElement != canv) {
-        canv.requestPointerLock();
-    }
-}
-canv.addEventListener("click", tryGetPointerLock);
-menuElem.querySelector("#backToGame").addEventListener("click", tryGetPointerLock);
-document.addEventListener("pointerlockchange", () => {
-    if (document.pointerLockElement != canv) {
-        gameState.menu = true;
+function toggleMenu() {
+    gameState.menu = !gameState.menu;
+    if (gameState.menu) {
         menuElem.style.display = "block";
     } else {
-        gameState.menu = false;
         menuElem.style.display = "none";
     }
-});
+}
+menuElem.querySelector("#backToGame").addEventListener("click", toggleMenu);
 
+const keyInputState = watchKeys(
+    [" ", "shift", "w", "a", "s", "d"],
+    { "escape": toggleMenu }
+);
 const mouseInputState = watchAndHideMouse();
-const keyInputState = watchKeys([" ", "shift", "w", "a", "s", "d"]);
 
-// respond to user input ======================================================
 const mouseSensitivity = 1.5 / 1000;
 function update(delta) {
     // do nothing if in menu
@@ -225,5 +238,4 @@ function outFps(fps) {
     dashslots[0].innerText = `FPS: ${fps.toFixed(0)}`;
 }
 
-// initiate game loop
 const cancelFrames = runGameLoop(update, draw, outFps);
