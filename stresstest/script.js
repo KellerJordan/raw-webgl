@@ -69,17 +69,18 @@ const offsetUniformLocation = gl.getUniformLocation(program, "u_offset");
 
 // track gameState and draw depending =========================================
 const gameState = {
+    fov: 0.9 * Math.PI,
     playerX: 0.5,
     playerY: 1.3,
     playerZ: 0.5,
     thetaX: 0,
-    thetaY: 0.0,
+    thetaY: 0,
     velocity: 20.0,
     menu: false,
 };
 
 function draw() {
-    const { thetaX, thetaY, playerX, playerY, playerZ } = gameState;
+    var { fov, thetaX, thetaY, playerX, playerY, playerZ } = gameState;
 
     // viewing transformation matrix
     var transformMatrix = new THREE.Matrix4()
@@ -94,8 +95,8 @@ function draw() {
         .multiply(new THREE.Matrix4().set(
             1, 0, 0, 0,
             0, 1, 0, 0,
-            0, 0, 0, -0.01,
-            0, 0, 1, 0,
+            0, 0, 0, -0.1,
+            0, 0, Math.tan(fov/2), 0,
         ))
         // 3. YZ-plane rotation
         .multiply(new THREE.Matrix4().set(
@@ -155,6 +156,10 @@ document.addEventListener("pointerlockchange", () => {
         gameState.menu = false;
         menuElem.style.display = "none";
     }
+});
+menuElem.querySelector("#setFOV").addEventListener("click", () => {
+    const fovDegrees = prompt("set FOV (in degrees):", 90);
+    gameState.fov = Math.PI/180 * fovDegrees;
 });
 
 const mouseSettings = { sensitivity: 1.5/1000 };
