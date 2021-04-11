@@ -91,7 +91,7 @@ function watchKeys(holdKeys) {
 
 // returns mouse X and Y as delta from center of client
 // using up is positive for Y
-function watchAndHideMouse() {
+function watchAndHideMouse(maxAbsY) {
     // track mouse position: use a fixed system if no pointer lock, and infinite with pointer lock.
     const mouseState = { x: 0, y: 0 };
     canv.addEventListener("mousemove", e => {
@@ -101,6 +101,9 @@ function watchAndHideMouse() {
         } else {
             mouseState.x = e.clientX - window.innerWidth / 2;
             mouseState.y = window.innerHeight / 2 - e.clientY;
+        }
+        if (Math.abs(mouseState.y) > maxAbsY) {
+            mouseState.y = Math.sign(mouseState.y) * maxAbsY;
         }
     });
     return mouseState;

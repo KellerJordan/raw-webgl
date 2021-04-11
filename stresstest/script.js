@@ -10,8 +10,8 @@ if (!gl) {
 gl.enable(gl.DEPTH_TEST);
 
 const PARAMS = {
-    inChunkReps: 512,
-    chunkReps: 2,
+    inChunkReps: 256,
+    chunkReps: 4,
 };
 PARAMS.numVertices = 6 * PARAMS.inChunkReps**2;
 PARAMS.numInstances = (2*PARAMS.chunkReps)**2;
@@ -157,11 +157,12 @@ document.addEventListener("pointerlockchange", () => {
     }
 });
 
-const mouseInputState = watchAndHideMouse();
+const mouseSettings = { sensitivity: 1.5/1000 };
+// maxAbsY the highest mouse position s.t. looking straight up or down
+const mouseInputState = watchAndHideMouse(0.5/mouseSettings.sensitivity);
 const keyInputState = watchKeys([" ", "shift", "w", "a", "s", "d"]);
 
 // respond to user input ======================================================
-const mouseSensitivity = 1.5 / 1000;
 function update(delta) {
     // do nothing if in menu
     if (gameState.menu) {
@@ -169,12 +170,8 @@ function update(delta) {
     }
 
     // update camera direction
-    gameState.thetaY = mouseSensitivity * Math.PI * mouseInputState.x;
-    var thetaX = mouseSensitivity * Math.PI * mouseInputState.y;
-    if (Math.abs(thetaX) > Math.PI/2) {
-        thetaX = Math.sign(thetaX) * Math.PI/2;
-    }
-    gameState.thetaX = thetaX;
+    gameState.thetaY = mouseSettings.sensitivity * Math.PI * mouseInputState.x;
+    gameState.thetaX = mouseSettings.sensitivity * Math.PI * mouseInputState.y;
 
     // update player position
     const { thetaY, velocity } = gameState;
