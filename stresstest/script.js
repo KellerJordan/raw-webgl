@@ -69,7 +69,7 @@ const offsetUniformLocation = gl.getUniformLocation(program, "u_offset");
 
 // track gameState and draw depending =========================================
 const gameState = {
-    fov: 0.9 * Math.PI,
+    fov: 0.6 * Math.PI,
     playerX: 0.5,
     playerY: 1.3,
     playerZ: 0.5,
