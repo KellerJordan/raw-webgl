@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebGL Experiments</title>
+        <style>
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+            }
+            #dashboard {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 150px;
+                padding: 5px;
+                background-color: beige;
+                border-radius: 10px;
+            }
+            #dashboard > p {
+                margin: 0;
+            }
+            #menu {
+                position: absolute;
+                top: 35%;
+                right: 35%;
+                width: 30%;
+                height: 20%;
+                display: none;
+                background-color: beige;
+                border-radius: 10px;
+                padding: 10px;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            }
+            #backToGame {
+                font-size: 15px;
+            }
+        </style>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.min.js"></script>
+    </head>
+    <body>
+        <div id="dashboard">
+            <p></p>
+            <p></p>
+        </div>
+        <div id="menu">
+            <h1>This is the menu</h1>
+            What can I get for you
+            <br>
+            <button id="setFOV">Set FOV</button>
+            <br>
+            <br>
+            <p id="buttonHolder">
+                <button id="backToGame">Back to game</button>
+            </p>
+        </div>
+        <canvas></canvas>
+        <script type="text/javascript" src="utils.js"></script>
+        <script type="text/javascript" src="glUtils.js"></script>
+        <script type="text/javascript" src="meshUtils.js"></script>
+        <script type="text/javascript" src="shaders.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+    </body>
+</html>
+
+
