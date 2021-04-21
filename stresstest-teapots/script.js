@@ -154,12 +154,13 @@ function render() {
             // slow version
             //transformMatrices[i].set(paramsToTransformMatrix(params[3], params[4]));
             // fast version
+            const s = params[3];
             const t = params[4] * thetaR;
-            const co = params[3] * Math.cos(t);
-            const si = params[3] * Math.sin(t);
+            const co = s * Math.cos(t);
+            const si = s * Math.sin(t);
             transformMatrices[i].set([
                 co, 0, si,
-                0, 1, 0,
+                0, s, 0,
                 -si, 0, co,
             ]);
         });

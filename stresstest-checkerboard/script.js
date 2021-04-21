@@ -10,7 +10,7 @@ if (!gl) {
 gl.enable(gl.DEPTH_TEST);
 
 const PARAMS = {
-    inChunkReps: 256,
+    inChunkReps: 128,
     chunkReps: 4,
 };
 PARAMS.numVertices = 6 * PARAMS.inChunkReps**2;

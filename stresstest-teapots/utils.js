@@ -91,6 +91,12 @@ function runGameLoop(update, render, fpsOut) {
 
     function frame(currTime) {
         reqId = requestAnimationFrame(frame);
+        /*
+        reqId = setTimeout(() => {
+            const newTime = performance.now();
+            frame(newTime);
+        }, 16.67);
+        */
         lastReqIsFrame = true;
 
         update(currTime - prevTime);
